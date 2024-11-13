@@ -18,7 +18,6 @@ const errorHandlerMap = new Map([
   [ValidationError, handleValidationError],
   [UniqueConstraintError, handleUniqueConstraintError],
   [ForeignKeyConstraintError, handleForeignKeyConstraintError],
-//   [MulterError, handleMulterError],
 ]);
 
 function handleApiError(error, res) {
@@ -40,10 +39,5 @@ function handleForeignKeyConstraintError(error, res) {
     id_value: error.value,
   });
 }
-
-// function handleMulterError(error, res) {
-//   const limit = error.field === "quadro" ? "250" : "50";
-//   res.status(413).json({ msg: `Arquivo enviado não pode ser maior que ${limit}MB` });
-// }
 
 module.exports = errorHandler;

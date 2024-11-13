@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const controller = require("../src/controllers/statusController");
+const controller = require("../src/controllers/commentController");
 
 router.post("/", controller.create);
 router.get("/", controller.list);

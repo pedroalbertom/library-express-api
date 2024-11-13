@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const controller = require("../src/controllers/eventTypeController");
+const controller = require("../src/controllers/bookController");
 
 router.post("/", controller.create);
 router.get("/", controller.list);
