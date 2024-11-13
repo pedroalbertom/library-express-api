@@ -1,7 +1,7 @@
 {
-  "name": "controle-patrimonial",
+  "name": "API-Mobile",
   "version": "1.0.0",
-  "description": "Projeto do controle patrimonial do laboratório vortex",
+  "description": "API para desenvolvimento mobile",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

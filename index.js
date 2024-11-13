@@ -3,25 +3,24 @@ const express = require("express")
 const app = express()
 const connection = require("./src/database/connection")
 const router = require("./routes/router")
-const errorHandler = require("./src/middlewares/error")
 const PORT = process.env.PORT || 3000
 
-// Database
-connection.authenticate().then(() => {
 
-    app.use(express.urlencoded({ extended: false }))
-    app.use(express.json())
+const startServer = async () => {
+    try {
+        await connection.authenticate();
+        app.use(express.urlencoded({ extended: false }));
+        app.use(express.json());
+        app.use(cors());
+        app.all("*", router);
 
-    app.all("*", router)
+        // await connection.dropAllSchemas()
+        await connection.sync({ force: false });
 
-    app.use(errorHandler)
+        app.listen(PORT, () => { console.log(`\nServidor rodando na porta ${PORT}`) });
+    } catch (error) {
+        console.error("Erro ao iniciar o servidor:", error);
+    }
+}; EREREREROR
 
-    app.listen(PORT, () => {
-        console.log(`Servidor rodando na porta ${PORT}`)
-    })
-
-}).catch((err) => {
-
-    console.log(err)
-
-})
+startServer();
