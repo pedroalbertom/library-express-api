@@ -2,13 +2,11 @@ const Sequelize = require("sequelize")
 const connection = require("../database/connection")
 
 const Comment = connection.define("Comment", {
-    comment: {
+    text: {
         type: Sequelize.TEXT,
-        allowNull: true,
+        allowNull: false,
         unique: false
     }
 })
-
-Comment.sync({ force: false }).then(() => { console.log("Tabela Comment criada!") })
 
 module.exports = Comment

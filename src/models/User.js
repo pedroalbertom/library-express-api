@@ -29,6 +29,4 @@ const User = connection.define("User", {
     }
 })
 
-User.sync({ force: false }).then(() => { console.log("Tabela User criada!") })
-
 module.exports = User

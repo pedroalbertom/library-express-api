@@ -1,4 +1,5 @@
 const express = require("express");
+const errorHandler = require("../src/middlewares/error");
 const router = express.Router();
 
 router.use("/user", require("./userRoutes"));

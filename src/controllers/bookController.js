@@ -1,4 +1,4 @@
-const Book = require("../models/Book");
+const Book = require("../hooks/Book");
 
 const bookController = {
   create: async (req, res) => {

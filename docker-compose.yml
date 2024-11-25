@@ -1,0 +1,37 @@
+services:
+  library_db:
+    container_name: library_db
+    image: mysql:8.0
+    env_file:
+      - .env
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_ROOT_PASSWORD=${DB_PASS}
+      - TZ=America/Sao_Paulo
+    ports:
+      - "3307:3306"
+    volumes:
+      - library-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  library_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: library_api
+    depends_on:
+      library_db:
+        condition: service_healthy
+    command: npm start
+    restart: always
+    ports:
+      - "3003:3003"
+    environment:
+      TZ: America/Sao_Paulo
+
+volumes:
+  library-mysql-data:

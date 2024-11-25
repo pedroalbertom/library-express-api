@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize")
 const connection = require("../database/connection")
 
-const book = connection.define("book", {
+const Book = connection.define("Book", {
     title: {
         type: Sequelize.STRING,
         allowNull: false
@@ -23,6 +23,4 @@ const book = connection.define("book", {
     }
 })
 
-book.sync({ force: false }).then(() => { console.log("Tabela book criada!") })
-
-module.exports = book
+module.exports = Book
