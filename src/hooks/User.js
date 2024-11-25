@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt")
 
 User.belongsToMany(Book, { through: "UserBook" })
 User.hasMany(Comment, {
-    foreignKey: "user_id",
+    foreignKey: "userId",
     onDelete: "CASCADE",
     hooks: true,
 })

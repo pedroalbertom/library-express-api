@@ -1,11 +1,20 @@
 const Comment = require("../hooks/Comment");
+const Book = require("../hooks/Book");
 
 const commentController = {
   create: async (req, res) => {
-    const { text } = req.body
-    await Comment.create({ text })
-    return res.status(201).json({ msg: "Comentário criado com sucesso!" })
+    const { text, bookId } = req.body;
+
+    const userId = req.user.id;
+
+    const book = await Book.findByPk(bookId);
+    if (!book) return res.status(404).json({ msg: "Livro não encontrado." });
+
+    const comment = await Comment.create({ text, bookId, userId });
+
+    return res.status(201).json({ msg: "Comentário criado com sucesso!", comment });
   },
+
 
   list: async (req, res) => {
     const commentList = await Comment.findAll()

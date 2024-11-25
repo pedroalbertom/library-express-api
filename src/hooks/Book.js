@@ -4,7 +4,7 @@ const Comment = require("../models/Comment")
 
 Book.belongsToMany(User, { through: "UserBook" })
 Book.hasMany(Comment, {
-    foreignKey: "book_id",
+    foreignKey: "bookId",
     onDelete: "CASCADE",
     hooks: true,
 })
