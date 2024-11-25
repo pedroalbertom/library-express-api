@@ -9,20 +9,43 @@ const authController = {
         const { registration, password } = req.body;
         const user = await User.findOne({ where: { registration } });
         if (!user) throw new ApiError("Credenciais incorretas", 401);
-
+        const groups = await user.getGroups();
         const comparison = await bcrypt.compare(password, user.password);
         if (!comparison) throw new ApiError("Credenciais incorretas", 401);
 
-        const payload = { id: user.id, isAdmin: user.isAdmin };
-        const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: '12h' });
+        const payload = { id: user.id, isSuperAdmin: user.isSuperAdmin, isAdmin: user.isAdmin };
+        const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+        const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '12h' });
+        user.refreshToken = refreshToken;
+        await user.save();
 
         res.json({
             id: user.id,
             name: user.name,
             registration: user.registration,
             email: user.email,
+            area: user.area,
             isAdmin: user.isAdmin,
-            token
+            Groups: groups,
+            accessToken: accessToken,
+            refreshToken: refreshToken
+        });
+    },
+
+    token: async (req, res) => {
+        const { token } = req.body;
+        if (!token) throw new ApiError("Token não enviado!", 401);
+        const user = await User.findOne({ where: { refreshToken: token } });
+        if (!user) throw new ApiError("Usuário não autenticado!", 401);
+
+        jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, userPayload) => {
+            if (err) throw new ApiError("Token inválido!", 401);
+            const accessToken = jwt.sign(
+                { id: userPayload.id, isSuperAdmin: userPayload.isSuperAdmin, isAdmin: userPayload.isAdmin },
+                process.env.ACCESS_TOKEN_SECRET,
+                { expiresIn: '15m' }
+            );
+            res.json({ accessToken });
         });
     },
 
@@ -31,53 +54,64 @@ const authController = {
         const token = authHeader && authHeader.split(" ")[1];
         if (!token) throw new ApiError("Usuário não autenticado", 401);
 
-        const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
-        const user = await User.findOne({ where: { id: decoded.id } });
+        const user = await User.findOne({ where: { id: jwt.decode(token).id } });
         if (!user) throw new ApiError("Usuário não existe!", 403);
+        await user.update({ refreshToken: null });
 
         res.json({ msg: "Usuário deslogado com sucesso!" });
     },
 
     register: async (req, res) => {
         const newUser = req.body;
+        const groupIds = req.body.Groups;
 
-        if (!req.user.isAdmin) throw new ApiError('Somente administradores podem criar um novo usuário', 403);
+        if (!req.user.isSuperAdmin && !req.user.isAdmin) throw new ApiError('Somente administradores podem criar um novo usuário', 403);
+        if (req.user.isAdmin && !groupIds) throw new ApiError('Não é permitido criar um novo usuário sem um grupo', 400);
 
+        const groups = await Group.findAll({ where: { id: groupIds } });
         const user = await User.create(newUser);
+
+        if (groups.length !== groupIds.length) {
+            return res.status(400).json({ message: 'Alguns grupos não foram encontrados.' });
+        }
+
+        await Promise.all(groups.map(async (group) => {
+            await group.addUser(user);
+        }));
+
         res.status(201).json(sanitizeUserData(user.toJSON()));
     },
 
     forgotPass: async (req, res) => {
         const { email } = req.body;
         if (!email) throw new ApiError("Informe o email", 422);
-
         const user = await User.findOne({ where: { email } });
-        if (!user) throw new ApiError("Email não encontrado", 401);
+        if (!user) throw new ApiError("Email enviado com sucesso", 401);
 
         const code = generateCode(4);
         const recovery_token = jwt.sign({}, code, { expiresIn: "20m" });
         user.set({ recovery_token });
-        await user.save();
+        user.save();
 
         const getMailBody = require("../utils/mailBody");
         const buffer = Buffer.from(getMailBody(user.name, code), ["text/html"]);
 
-        mailer.transporter.sendMail({
-            from: mailer.address,
-            to: user.email,
-            subject: "Recuperação de senha",
-            html: `${buffer}`,
-        });
+        mailer.transporter
+            .sendMail({
+                from: mailer.address,
+                to: user.dataValues.email,
+                subject: "Unifor Mídia - Recuperação de senha",
+                html: `${buffer}`,
+            })
+            .then(() => console.log("Email enviado!"));
 
         res.json({ msg: "Email enviado com sucesso" });
     },
 
-    resetPass: async (req, res) => {
+    resetPass: async function (req, res) {
         const { email, code, password } = req.body;
         if (!email) throw new ApiError("Informe o email", 422);
-
         const user = await User.findOne({ where: { email } });
-        if (!user) throw new ApiError("Usuário não encontrado", 404);
 
         try {
             jwt.verify(user.recovery_token, code.toLocaleUpperCase());
@@ -85,12 +119,11 @@ const authController = {
             throw new ApiError("Código inválido ou expirado", 403);
         }
 
-        if (!password) return res.json({ msg: "Código válido" });
+        if (!password) res.json({ msg: "Código válido" });
 
-        user.set({ password: await bcrypt.hash(password, 10), recovery_token: null });
+        user.set({ password, recovery_token: null });
         await user.save();
-
-        res.json({ msg: "Senha alterada com sucesso" });
+        res.json({ msg: "Senha alterada" });
     }
 };
 
@@ -107,6 +140,9 @@ function generateCode(digits) {
 function sanitizeUserData(userData) {
     delete userData.password;
     delete userData.recoveryToken;
+    delete userData.isSuperAdmin;
+    delete userData.isAdmin;
+
     return userData;
 }
 
