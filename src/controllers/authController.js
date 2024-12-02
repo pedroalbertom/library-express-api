@@ -13,8 +13,8 @@ const authController = {
         const comparison = await bcrypt.compare(password, user.password);
         if (!comparison) throw new ApiError("Credenciais incorretas", 401);
 
-        const payload = { id: user.id, isAdmin: user.isAdmin };
-        const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: '12h' });
+        const payload = { registration: user.registration, id: user.id, isAdmin: user.isAdmin };
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '12h' });
 
         res.json({
             id: user.id,

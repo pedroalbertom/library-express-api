@@ -3,6 +3,7 @@ const errorHandler = require("../src/middlewares/error");
 const router = express.Router();
 
 router.use("/user", require("./userRoutes"));
+router.use("/auth", require("./authRoutes"));
 router.use("/book", require("./bookRoutes"));
 router.use("/comment", require("./commentRoutes"));
 
