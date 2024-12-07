@@ -4,7 +4,7 @@ const cors = require("cors");
 const app = express()
 const connection = require("./src/database/connection")
 const router = require("./routes/router")
-const PORT = process.env.PORT || 3003
+const PORT = process.env.PORT || 3000
 
 
 const startServer = async () => {
@@ -15,7 +15,7 @@ const startServer = async () => {
         app.use(cors());
         app.all("*", router);
 
-        await connection.dropAllSchemas();
+        // await connection.dropAllSchemas();
         await connection.sync({ force: false });
 
         app.listen(PORT, () => { console.log(`\nServidor rodando na porta ${PORT}`) });
