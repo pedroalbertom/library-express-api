@@ -6,21 +6,32 @@ const Book = connection.define("Book", {
         type: Sequelize.STRING,
         allowNull: false
     },
-    description: {
-        type: Sequelize.TEXT('tiny'),
-        allowNull: true
-    },
-    patrimonyNumber: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        unique: true
+    isbn: {
+        type: Sequelize.BIGINT,
+        allowNull: false
     },
     author: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: false,
         defaultValue: "John Doe"
-    }
+    },
+    description: {
+        type: Sequelize.TEXT,
+        allowNull: true
+    },
+    publication: {
+        type: Sequelize.STRING,
+        allowNull: true
+    },
+    category: {
+        type: Sequelize.STRING,
+        allowNull: true
+    },
+    image: {
+        type: Sequelize.STRING,
+        allowNull: true
+    },
 })
 
 module.exports = Book

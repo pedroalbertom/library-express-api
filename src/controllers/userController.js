@@ -6,6 +6,11 @@ const userController = {
     return res.json(userList)
   },
 
+  listOne: async (req, res) => {
+    let user = await User.findByPk(req.params.id)
+    return res.json(user)
+  },
+
   update: async (req, res) => {
     let id = parseInt(req.params.id)
     let user = await User.findByPk(id)
