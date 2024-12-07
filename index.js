@@ -15,7 +15,7 @@ const startServer = async () => {
         app.use(cors());
         app.all("*", router);
 
-        await connection.dropAllSchemas();
+        // await connection.dropAllSchemas();
         await connection.sync({ force: false });
 
         app.listen(PORT, () => { console.log(`\nServidor rodando na porta ${PORT}`) });

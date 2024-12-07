@@ -13,7 +13,7 @@ const authenticateToken = (req, res, next) => {
         throw new ApiError("Usuário não autenticado", 401)
     }
 
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
         if (err) {
             console.log("Erro na verificação do token: " + err)
             throw new ApiError("Token inválido", 401)

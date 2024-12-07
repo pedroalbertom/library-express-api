@@ -1,7 +1,8 @@
 const router = require("express").Router();
 const controller = require("../src/controllers/commentController");
+const { authenticateToken } = require("../src/middlewares/auth");
 
-router.post("/", controller.create);
+router.post("/", authenticateToken, controller.create);
 router.get("/", controller.list);
 router.put("/:id", controller.update);
 router.delete("/:id", controller.delete);

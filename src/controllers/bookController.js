@@ -1,4 +1,5 @@
 const Book = require("../hooks/Book");
+const Comment = require("../hooks/Comment");
 
 const bookController = {
   create: async (req, res) => {
@@ -8,7 +9,7 @@ const bookController = {
   },
 
   list: async (req, res) => {
-    let bookList = await Book.findAll()
+    let bookList = await Book.findAll({include: [{model: Comment}]})
     return res.json(bookList)
   },
 
