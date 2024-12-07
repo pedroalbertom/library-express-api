@@ -1,3 +1,4 @@
+const ApiError = require("../classes/api-errors");
 const Book = require("../hooks/Book");
 const Comment = require("../hooks/Comment");
 const { buscarLivroPorISBN } = require("../services/bookApi");
@@ -5,6 +6,9 @@ const { buscarLivroPorISBN } = require("../services/bookApi");
 const bookController = {
   create: async (req, res) => {
     let { isbn } = req.body
+
+    if(isbn.length != 13) throw new ApiError('ISBN inválido!', 400)
+    
     let bookData = await buscarLivroPorISBN(isbn)
     await Book.create({isbn: isbn, title: bookData.title, author: bookData.author, description: bookData.description, publication: bookData.publication, category: bookData.category, image: bookData.image})
     return res.status(201).json({ msg: "Livro criado com sucesso!" })
