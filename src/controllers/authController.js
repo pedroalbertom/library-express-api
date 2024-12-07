@@ -44,6 +44,8 @@ const authController = {
     register: async (req, res) => {
         const newUser = req.body;
 
+        console.log("oi")
+
         const user = await User.create(newUser);
         res.status(201).json(sanitizeUserData(user.toJSON()));
     }
