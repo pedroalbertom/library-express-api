@@ -3,7 +3,8 @@ const express = require("express")
 const cors = require("cors");
 const app = express()
 const connection = require("./src/database/connection")
-const router = require("./routes/router")
+const router = require("./routes/router");
+const { seedAdmin } = require("./src/services/seeds");
 const PORT = process.env.PORT || 3000
 
 
@@ -17,6 +18,8 @@ const startServer = async () => {
 
         // await connection.dropAllSchemas();
         await connection.sync({ force: false });
+
+        await seedAdmin()
 
         app.listen(PORT, () => { console.log(`\nServidor rodando na porta ${PORT}`) });
     } catch (error) {
